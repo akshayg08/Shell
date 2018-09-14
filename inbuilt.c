@@ -61,6 +61,7 @@ int cd(char ** args)
 
 int pwd(char ** args)
 {
+	int i;
 	char cwd[1000000];
 	getcwd(cwd,sizeof(cwd));
 	printf("%s\n",cwd);
@@ -68,9 +69,13 @@ int pwd(char ** args)
 
 int echo(char ** args)
 {
-	int i;
-
+	int i;	
 	for(i=1;args[i]!=NULL;i++)
-		printf("%s ",args[i]);
+	{
+		if(strcmp(args[i],">")==0)
+			break;
+		else 
+			printf("%s ", args[i]);
+	}
 	printf("\n");
 }

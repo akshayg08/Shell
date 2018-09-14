@@ -1,10 +1,15 @@
 #include "headers.h"
-
+ 
 int ls_details(struct stat buf,struct dirent * ent)
 {
+	int i;
+	int fd;
+	int save;
 	struct group *grp;
 	struct passwd *pwd;
 	char date[10000];
+	pwd = getpwuid(buf.st_uid);
+	grp = getgrgid(buf.st_gid);
 	printf((S_ISDIR(buf.st_mode))?"d":"-");
 	printf((buf.st_mode & S_IRUSR)?"r":"-");
 	printf((buf.st_mode & S_IWUSR)?"w":"-");
@@ -16,8 +21,6 @@ int ls_details(struct stat buf,struct dirent * ent)
 	printf((buf.st_mode & S_IWOTH)?"w":"-");
 	printf((buf.st_mode & S_IXOTH)?"x":"-");
 	printf(" %d",(int)buf.st_nlink);
-	grp = getgrgid(buf.st_gid);
-	pwd = getpwuid(buf.st_uid);
 	printf(" %s",grp->gr_name);
 	printf(" %s",pwd->pw_name);
 	strftime(date,50,"%b  %d  %R",localtime(&(buf.st_mtime)));
@@ -96,7 +99,7 @@ int ls(char ** args)
 	for(i=1;args[i]!=NULL;i++)
 	{
 		if(strcmp(args[i],"-l")!=0 && strcmp(args[i],"-a")!=0 && strcmp(args[i],"-la")!=0 && strcmp(args[i],"-al")!=0)
-		{
+		{					
 			if(strcmp(args[i],"~")==0)
 				args[i]=root;
 
@@ -111,16 +114,13 @@ int ls(char ** args)
 			printf("\n");
 		}
 	}
-
 	if(!flag)
 	{
 		DIR * dir;
 		struct dirent * ent;
 		if((dir=opendir("./"))!=NULL)
-		{
 			ls_display(ent,dir,l,a,"");
-		}
-		else 
+		else
 			perror("");
 	}
 	return 0;

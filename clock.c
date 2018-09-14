@@ -7,10 +7,10 @@ void signalhandler(int signum)
     printf("Clock exited normally.\n");
     fflush(stdout);
     flag = 1;
-    return ;
+    return;
 }
 
-int my_clock(char **args)
+int my_clock(char **args)   
 {
     flag=0;
 	if(args[1]==NULL)
@@ -44,10 +44,9 @@ int my_clock(char **args)
             perror("");
             return 0;
         }
-        
+
         fscanf(f1,"%s",new_date);
         fscanf(f2,"%s",new_time);
-
         printf("%s, %s\n",new_date,new_time);
         fclose(f1);
         fclose(f2);

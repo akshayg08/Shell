@@ -59,96 +59,76 @@ int getcommand()
 	int and = 0;
 	char * line = readline();
 	char ** tokens = split_command(line);
-	char * argv[10];
-
 
 	for(i=0;tokens[i]!=NULL;i++)
 	{
 		int flag = 0;
 		char ** commands = read_command(tokens[i]);
+		int len;
+
 		if(commands[0]==NULL)
 			return 1;
 
 		if (strcmp(commands[0],"exit")==0)
 			return 0;
 
-		else if (strcmp(commands[0],"cd")==0)
-			cd(commands);
+		len = strlen(commands[0]);
 
-		else if (strcmp(commands[0],"pwd")==0)
-			pwd(commands);
+		if(commands[0][len-1]=='&')
+		{
+			and = 1;
+			commands[0][len-1]='\0';
+		}
 
-		else if (strcmp(commands[0],"echo")==0)
-			echo(commands);
+		if(strcmp(commands[0],"remindme")==0)
+			and = 1;
 
-		else if (strcmp(commands[0],"ls")==0)
-			ls(commands);
-
-		else if(strcmp(commands[0],"pinfo")==0)
+		if(strcmp(commands[0],"pinfo")==0)
 			pinfo(commands);
 
 		else if(strcmp(commands[0],"clock")==0)
 			my_clock(commands);
 
-		else if(strcmp(commands[0],"remindme")==0)
+		else
 		{
-			int lap;
-			int i;
-			sscanf(commands[1],"%d",&lap);
-			int pid = fork();
+			int pid=fork();
+			int st;
 			if(pid==0)
 			{
-				sleep(lap);
-				for(i=2;commands[i]!=NULL;i++)
-					printf("%s ",commands[i]);
-				printf("\n");
+				if (strcmp(commands[0],"cd")==0)
+					cd(commands);
+				else if (strcmp(commands[0],"pwd")==0)
+					pwd(commands);
+
+				else if (strcmp(commands[0],"echo")==0)
+					echo(commands);
+
+				else if (strcmp(commands[0],"ls")==0)
+					ls(commands);
+
+
+				else if(strcmp(commands[0],"remindme")==0)
+				{
+					int lap;
+					int i;
+					sscanf(commands[1],"%d",&lap);
+					sleep(lap);
+					for(j=2;commands[j]!=NULL;j++)
+						printf("%s ",commands[j]);
+					printf("\n");
+				}
+				else
+				{
+					if(execvp(commands[0],commands)<0)
+						printf("Command Not Found\n");
+				}
 				exit(0);
 			}
 			else 
 			{
-				bgprocesses[pid]=commands[0];
-				continue;
-			}
-		}
-		else
-		{
-			int len = strlen(commands[0]);
-			if (commands[0][len-1]=='&')
-			{
-				and = 1;
-				commands[0][len-1]='\0';
-			}
-			if(!and)
-			{
-				int pid,st;
-				pid = fork();
-				if(pid<0)
-					perror("");
-				else if(pid==0)
-				{
-					if(execvp(commands[0],commands)<0)
-						printf("Command Not Found\n");
-					exit(0);
-				}
-				else
+				if(!and)
 					waitpid(pid,&st,WUNTRACED);
-			}
-			else
-			{
-				int pid = fork();
-				int st1;
-				if(pid<0)
-					perror("");
-
-				else if(pid==0)
-				{
-					if(execvp(commands[0],commands)<0)
-					{
-						printf("Command Not Found\n");
-						exit(0);
-					}
-				}
-				else
+				else 
 				{
 					bgprocesses[pid]=commands[0];
 					continue;
